@@ -11,22 +11,33 @@ static void nvm_ApplySaveSettings(unsigned short usDummyParam);
 
 int eeAddress = 0; //EEPROM address to start reading from
 TDIC_SystemDictionary  SystemData;
-bool nvm_save_flag = 0;
+bool nvm_save_flag = false;
 static T_TMR_Timer ConfigSaveTimer = -1;
 bool nvm_boot_flag = 0;
 
 
 void nvm_init(void)
 {
-	nvm_save_flag = 0;
+	nvm_save_flag = false;
 	EEPROM.begin(512);
     delay(10); 
     Serial.println("Reading EEPROM....................");
-    EEPROM.get(eeAddress, SystemData);		
+    EEPROM.get(eeAddress, SystemData);	
+
+    if (MAGIC_NUMBER != SystemData.magic_number)
+    {
+        SystemData.magic_number = MAGIC_NUMBER;
+        nvm_clean_network();
+        nvm_clean_SprayData();
+    }
+   
 
     SystemData.boot_count++;
-    nvm_save_flag = 1;
+    nvm_save_flag = true;
     nvm_boot_flag = 1;
+
+    Serial.printf("SystemData.eep_ssid=%d\n",SystemData.eep_ssid);
+    Serial.printf("SystemData.eep_pass=%d\n",SystemData.eep_pass);
 	
     if(ConfigSaveTimer == (T_TMR_Timer)-1)
    	  ConfigSaveTimer = TMR_TimerAdd(TMR_Cyclic, nvm_ApplySaveSettings, 0);
@@ -40,11 +51,13 @@ static void IRAM_ATTR nvm_ApplySaveSettings(unsigned short usDummyParam)
 //================================================================================================
 void nvm_handle(void)
 {
-    if (1==nvm_save_flag)
+    if (true==nvm_save_flag)
 	{
-		nvm_save_flag = 0;
-		EEPROM.put(eeAddress, SystemData);
-		EEPROM.commit();
+	  Serial.println("NVM saving...");
+	  nvm_save_flag = false;
+	  EEPROM.put(eeAddress, SystemData);
+	  EEPROM.commit();
+       Serial.println("NVM save done");
 	}			
 }
 //================================================================================================

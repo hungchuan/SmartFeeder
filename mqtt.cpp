@@ -11,22 +11,33 @@ const char* user_name = "mqtt";
 const char* user_password = "mqtt";
 
 // ESP8266訂閱的主題：收到 0 關閉 LED，1 打開LED
-const char* topic_subscribe1 = "ha/1F/garage/switch"; 
-const char* topic_subscribe2 = "ha/1F/garage/switch/ryan"; 
-const char* topic_subscribe3 = "ha/1F/garage/switch/emma"; 
-const char* topic_subscribe_switch_1 = "ha/1F/garage/switch/"; 
-const char* topic_subscribe_gps_1 = "owntracks/mqtt/Ryan"; 
-const char* topic_subscribe_gps_2 = "owntracks/mqtt/Emma"; 
-const char* topic_publish = "ha/1F/garage/states";
+//const char* topic_subscribe1 = "ha/1F/garage/switch"; 
+const char* topic_subscribe1 = "ha/feeder/switch"; 
+//const char* topic_subscribe2 = "ha/1F/garage/switch/ryan"; 
+//const char* topic_subscribe3 = "ha/1F/garage/switch/emma"; 
+//const char* topic_subscribe_switch_1 = "ha/1F/garage/switch/"; 
+
+//const char* topic_publish = "ha/1F/garage/states";
+const char* topic_publish = "ha/feeder/states";
 
 char* Garage_ON = "ON"; 
 char* Garage_OFF = "OFF"; 
-char* Garage_states_msg = "";
+char* mqtt_msg_feeder0 = "0"; 
+char* mqtt_msg_feeder1 = "1"; 
+char* mqtt_msg_feeder2 = "2"; 
+char* mqtt_msg_feeder3 = "3"; 
+char* mqtt_msg_feeder4 = "4"; 
+char* mqtt_msg_feeder5 = "5"; 
+char* mqtt_msg_feeder6 = "6"; 
+
+
+//char* Garage_states_msg = "";
+char* Feeder_states_msg = "";
 int Garage_states = 0;
 int prevGarage_states = 0;
 bool topic_subscribe1_flag=false;
-bool topic_subscribe2_flag=false;
-bool topic_subscribe3_flag=false;
+//bool topic_subscribe2_flag=false;
+//bool topic_subscribe3_flag=false;
 
 
 
@@ -91,37 +102,12 @@ void mqtt_handle(void)
 	   {
 	       topic_subscribe1_flag = false;
 					
-		  Serial.println("topic_subscribe1_flag");
-		  //client.publish(topic_publish, Garage_states_msg); // 發布MQTT主題與訊息		
-
-		  if (0==Garage_states)
-            {
-		      door_Close_Garage();
-                mqtt_set_publish(msg_Garage_OFF);
-            }
-		  else if (1==Garage_states)
-		  {			
-		      door_Open_Garage();
-                mqtt_set_publish(msg_Garage_ON);
-		  }
-		  else if (2==Garage_states)
-		  {
-                if (true==device_ip_tracking(0))
-                    return;
-                Serial.println("Garage_open=====ryan");
-                door_Open_Garage();
-                mqtt_set_publish(msg_Garage_ON);
-		  }
-		  else if (3==Garage_states)
-		  {
-              if (true==device_ip_tracking(1))
-                  return;
-              Serial.println("Garage_open=====emma");
-              door_Open_Garage();
-              mqtt_set_publish(msg_Garage_ON);
-		  }	          
+		  Serial.println("topic_subscribe1_flag");		
+            set_feed_timeout_flag(True);
+            set_system_status(2); 
+            //mqtt_set_publish(Get_feed_time()+1);
         }
-
+/*
         if (true==topic_subscribe2_flag)
         {
            topic_subscribe2_flag = false;
@@ -130,20 +116,7 @@ void mqtt_handle(void)
 
            //client.publish(topic_publish, Garage_states_msg); // 發布MQTT主題與訊息
            
-             
-           if (1==Garage_states)
-           {     
-               if (true==device_ip_tracking(0))
-                   return;
-                               
-               door_Open_Garage();
-               mqtt_set_publish(msg_Garage_ON);
-           }
-           else
-           {
-               door_Close_Garage();
-               mqtt_set_publish(msg_Garage_OFF);
-           }                             
+
          }
 
         if (true==topic_subscribe3_flag)
@@ -154,27 +127,14 @@ void mqtt_handle(void)
 
            //client.publish(topic_publish, Garage_states_msg); // 發布MQTT主題與訊息
            
-             
-           if (1==Garage_states)
-           {         
-               if (true==device_ip_tracking(1))
-                   return;           
-               
-               door_Open_Garage();
-               mqtt_set_publish(msg_Garage_ON);
-           }
-           else
-           {
-               door_Close_Garage();
-               mqtt_set_publish(msg_Garage_OFF);
-           }                             
-         }
 
+         }
+*/
 
         if (true==topic_publish_flag)
         {
             topic_publish_flag = false;
-            client.publish(topic_publish, Garage_states_msg);
+            client.publish(topic_publish, Feeder_states_msg);
         }
        
     }
@@ -200,131 +160,18 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
 
   if(strcmp(topic, topic_subscribe1) == 0)
   {
-     if(strcmp(mqtt_msg, "ON") == 0)
-	 {
-		topic_subscribe1_flag = true;
-		Garage_states=1;
-          thingspeak_set_mqtt_command(1);
-		//Garage_states_msg = msg_Garage_ON;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }
-	 else if(strcmp(mqtt_msg, "OFF") == 0)
-	 {
-		topic_subscribe1_flag = true;
-		Garage_states=0;
-          thingspeak_set_mqtt_command(0);
-		//Garage_states_msg = msg_Garage_OFF;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }
-      else if(strcmp(mqtt_msg, "ryan") == 0)
+      //if(strcmp(mqtt_msg, "ON") == 0)
       {
-          topic_subscribe1_flag = true;
-          Garage_states=2;
-          thingspeak_set_mqtt_command(2);
+         topic_subscribe1_flag = true;
+         //thingspeak_set_mqtt_command(1);
       }
-      else if(strcmp(mqtt_msg, "emma") == 0)
-      {
-          topic_subscribe1_flag = true;
-          Garage_states=3;
-          thingspeak_set_mqtt_command(3);
-      }      
+
   }
   
-  if(strcmp(topic, topic_subscribe2) == 0)
-  {  
-     if(strcmp(mqtt_msg, "ON") == 0)
-	 {
-		topic_subscribe2_flag = true;
-		Garage_states=1;
-		//Garage_states_msg = msg_Garage_ON;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }
-	 else if(strcmp(mqtt_msg, "OFF") == 0)
-	 {
-		topic_subscribe2_flag = true;
-		Garage_states=0;
-		//Garage_states_msg = msg_Garage_OFF;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }  
-  }  
 
-  if(strcmp(topic, topic_subscribe3) == 0)
-  {  
-     if(strcmp(mqtt_msg, "ON") == 0)
-	 {
-		topic_subscribe3_flag = true;
-		Garage_states=1;
-		//Garage_states_msg = msg_Garage_ON;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }
-	 else if(strcmp(mqtt_msg, "OFF") == 0)
-	 {
-		topic_subscribe3_flag = true;
-		Garage_states=0;
-		//Garage_states_msg = msg_Garage_OFF;	
-          //Event_EventSend(MN_mqttCheck, (void *)NULL);
-	 }  
-  }  
 
-  if(strcmp(topic, topic_subscribe_gps_1) == 0)
-  {  
-      // Deserialize the JSON document
-      DeserializationError error = deserializeJson(doc,mqtt_msg);
 
-      // Test if parsing succeeds.
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-        return;
-      }
-  
-      float latitude    = doc["lat"];
-      float longitude   = doc["lon"];	 
-      Serial.print("lat = ");  
-      Serial.println(latitude);        
-      Serial.print("lon = ");  
-      Serial.println(longitude);
-      device_set_loction(0,latitude,longitude);
-      Serial.print("Distance_GPS1= ");  
-      Serial.println(getDistanceGD(Home_lati,Home_long,latitude,longitude));
-      
-      Event_EventSend(MN_location, (void *)NULL);      
-  }  
 
-  if(strcmp(topic, topic_subscribe_gps_2) == 0) 
-  {  
-      // Deserialize the JSON document
-      DeserializationError error = deserializeJson(doc,mqtt_msg);
-
-      // Test if parsing succeeds.
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-        return;
-      }
-  
-      float latitude    = doc["lat"];
-      float longitude   = doc["lon"];	 
-      Serial.print("lat = ");  
-      Serial.println(latitude);        
-      Serial.print("lon = ");  
-      Serial.println(longitude);
-      Serial.print("Distance_GPS2= ");  
-      Serial.println(getDistanceGD(Home_lati,Home_long,latitude,longitude));	  
-  }    
-	
-/*	
-  int p =(char)payload[0]-'0'; 
-  if(p==0) // MQTT 傳來 0 熄滅 D2 上的 LED
-  {
-	  Close_Garage();
-  } 
-  
-  if(p==1) // MQTT 傳來 1 點亮 D2 上的 LED
-  {
-	  Open_Garage();
-  }
-*/
   Serial.println();
 } //end callback
 //=================================================================================================
@@ -365,21 +212,54 @@ void IRAM_ATTR mqtt_check_connection(unsigned short usDummyParam)
 //================================================================================================
 void mqtt_set_publish(char* msg)
 {
-    Garage_states_msg = msg;	   
+    Feeder_states_msg = msg;	   
     topic_publish_flag = true;
-    //Event_EventSend(MN_mqttCheck, (void *)NULL);    
-    //client.publish(topic_publish, Garage_states_msg); 
 }
 //================================================================================================
-void mqtt_set_garage_publish(int status)
+void mqtt_set_feeder_time(int num)
+{
+    switch (num)
+    {
+      case 0:
+        mqtt_set_publish(mqtt_msg_feeder0);
+      break;
+      case 1:
+         mqtt_set_publish(mqtt_msg_feeder1);
+      break;
+      case 2:
+         mqtt_set_publish(mqtt_msg_feeder2);
+      break;
+      case 3:
+         mqtt_set_publish(mqtt_msg_feeder3);
+      break;
+      case 4:
+         mqtt_set_publish(mqtt_msg_feeder4);
+      break;
+      case 5:
+         mqtt_set_publish(mqtt_msg_feeder5);
+      break;
+      case 6:
+         mqtt_set_publish(mqtt_msg_feeder6);
+      break;
+      default:
+        mqtt_set_publish(mqtt_msg_feeder0);
+        break;
+
+    }
+        
+    //mqtt_set_publish(msg_Garage_OFF);
+}
+
+//================================================================================================
+void mqtt_set_feeder_publish(int status)
 {
     if (CLOSE==status)
     {
-       Garage_states_msg = Garage_OFF;	    
+       Feeder_states_msg = Garage_OFF;	    
     }
     else
     {
-  	  Garage_states_msg = Garage_ON;
+  	  Feeder_states_msg = Garage_ON;
     }
     topic_publish_flag = true;
     //Event_EventSend(MN_mqttCheck, (void *)NULL);

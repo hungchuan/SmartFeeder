@@ -7,11 +7,12 @@ extern "C" {
 
 #define _ssid_len_ 32
 #define _pw_len_ 64
+#define MAGIC_NUMBER 0x5AA5
 
 
 typedef struct
 {
-//  int magic_number; //2 byte
+  int magic_number; //2 byte
   byte date;	// 1 byte
   byte spraytime;	// 1 byte 
   unsigned int boot_count;	// 2 byte 

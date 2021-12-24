@@ -20,7 +20,8 @@ void mqtt_init(void);
 void mqtt_handle(void);
 void mqtt_check_connection(unsigned short usDummyParam);
 void mqtt_set_publish(char* msg);
-void mqtt_set_garage_publish(int status);
+void mqtt_set_feeder_time(int num);
+void mqtt_set_feeder_publish(int status);
 
 
 #ifdef __cplusplus

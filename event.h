@@ -14,7 +14,8 @@ typedef enum    {
 				MN_DoorOff,
 				MN_DoorDetect,
 				MN_thingspeak_upload,
-				MN_location,				
+				MN_location,	
+				MN_ADC,	
                     MN_End,    
                     MN_NULL = 0xFF				
                 } T_MN_Event;
